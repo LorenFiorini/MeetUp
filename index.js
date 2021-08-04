@@ -24,8 +24,7 @@ var rsvpListener = null;
 var guestbookListener = null;
 
 async function main() {
-  // Add Firebase project configuration object here
-  // var firebaseConfig = {};
+  // Firebase project configuration object
   const firebaseConfig = {
     apiKey: 'AIzaSyCywO9Y1dImuqux0QnlT-rv7bw-SQ-qtwg',
     authDomain: 'fir-amazing-web-codelab.firebaseapp.com',
@@ -36,7 +35,7 @@ async function main() {
     measurementId: 'G-1MTC0FZB1K'
   };
 
-  // firebase.initializeApp(firebaseConfig);
+  // Initialize App
   firebase.initializeApp(firebaseConfig);
 
   // FirebaseUI config
@@ -44,7 +43,8 @@ async function main() {
     credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     signInOptions: [
       // Email / Password Provider.
-      firebase.auth.EmailAuthProvider.PROVIDER_ID
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID
     ],
     callbacks: {
       signInSuccessWithAuthResult: function(authResult, redirectUrl) {
@@ -60,8 +60,8 @@ async function main() {
   provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
   firebase.auth().useDeviceLanguage();*/
 
-  // const ui = new firebaseui.auth.AuthUI(firebase.auth());
   const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
   /*startRsvpButton.addEventListener('click', () => {
     ui.start('#firebaseui-auth-container', uiConfig);
   });*/
@@ -75,10 +75,27 @@ async function main() {
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      startRsvpButton.textContent = 'LogOut';
+      startRsvpButton.textContent = 'LOGOUT';
+      guestbookContainer.style.display = 'block';
     } else {
-      startRsvpButton.textContent = 'LogIn';
+      startRsvpButton.textContent = 'Login';
+      guestbookContainer.style.display = 'none';
     }
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    firebase
+      .firestore()
+      .collection('guestbook')
+      .add({
+        text: input.value,
+        timestamp: Date.now(),
+        name: firebase.auth().currentUser.displayName,
+        userId: firebase.auth().currentUser.uid
+      });
+    input.value = '';
+    return false;
   });
 }
 main();
