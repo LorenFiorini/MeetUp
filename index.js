@@ -97,5 +97,18 @@ async function main() {
     input.value = '';
     return false;
   });
+
+  firebase
+    .firestore()
+    .collection('guestbook')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(snaps => {
+      guestbook.innerHTML = '';
+      snaps.forEach(doc => {
+        const entry = document.createElement('p');
+        entry.textContent = doc.data().name + ': ' + doc.data().text;
+        guestbook.appendChild(entry);
+      });
+    });
 }
 main();
